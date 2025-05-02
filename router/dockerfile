@@ -1,0 +1,13 @@
+FROM python:3.10-slim
+
+# Diretório de trabalho no container
+WORKDIR /app
+
+# Copia os arquivos do roteador para o container
+COPY . .
+
+# Instala dependências (se houver futuramente)
+# RUN pip install -r requirements.txt
+
+# Executa o script principal
+CMD ["python3", "router.py"]
