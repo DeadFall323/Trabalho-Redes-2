@@ -1,0 +1,102 @@
+services:
+  router1:
+    build: .
+    environment:
+      - ROUTER_ID=router1
+      - PORT=10000
+    volumes:
+      - ./config/router1:/app/config/router1
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.11
+
+  router2:
+    build: .
+    environment:
+      - ROUTER_ID=router2
+      - PORT=10000
+    volumes:
+      - ./config/router2:/app/config/router2
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.12
+
+  router3:
+    build: .
+    environment:
+      - ROUTER_ID=router3
+      - PORT=10000
+    volumes:
+      - ./config/router3:/app/config/router3
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.13
+
+  router4:
+    build: .
+    environment:
+      - ROUTER_ID=router4
+      - PORT=10000
+    volumes:
+      - ./config/router4:/app/config/router4
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.14
+
+  router5:
+    build: .
+    environment:
+      - ROUTER_ID=router5
+      - PORT=10000
+    volumes:
+      - ./config/router5:/app/config/router5
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.15
+
+  host1:
+    build: .
+    command: python hosts/hosts.py host1
+    depends_on: [router1]
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.101
+
+  host2:
+    build: .
+    command: python hosts/hosts.py host2
+    depends_on: [router2]
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.102
+
+  host3:
+    build: .
+    command: python hosts/hosts.py host3
+    depends_on: [router3]
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.103
+
+  host4:
+    build: .
+    command: python hosts/hosts.py host4
+    depends_on: [router4]
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.104
+
+  host5:
+    build: .
+    command: python hosts/hosts.py host5
+    depends_on: [router5]
+    networks:
+      sim_net:
+        ipv4_address: 192.168.250.105
+
+networks:
+  sim_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.250.0/24
