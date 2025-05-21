@@ -10,9 +10,15 @@ ROUTER_ID = os.environ.get("ROUTER_ID")
 PORT = int(os.environ.get("PORT", 5000))
 LSDB = {}
 
-def load_neighbors():
-    with open(f"config/{ROUTER_ID}/vizinhos.json") as f:
+def load_json(filename):
+    with open(filename) as f:
         return json.load(f)
+
+def load_neighbors():
+    return load_json(f"config/{ROUTER_ID}/vizinhos.json")
+
+def load_hosts():
+    return load_json(f"config/{ROUTER_ID}/hosts.json")
 
 def send_lsa(neighbor_ip, lsa_data):
     try:
@@ -23,54 +29,46 @@ def send_lsa(neighbor_ip, lsa_data):
     except Exception as e:
         print(f"[{ROUTER_ID}] Erro ao enviar LSA para {neighbor_ip}: {e}")
 
-#def receive_loop():
-#    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
- #   sock.bind(("", PORT))
-  #  while True:
-   #     data, addr = sock.recvfrom(4096)
-    #    lsa = json.loads(data.decode())
-     #   print(f"[{ROUTER_ID}] Recebeu LSA de {lsa['origin']}")
-#
- #       updated = processa_lsa(LSDB, lsa)
-  #      if updated:
-   #         atualiza_lsdb(ROUTER_ID, LSDB)
-#
- #           # Calcula e imprime a tabela de roteamento
-  #          tabela = calcula_tabela_roteamento(ROUTER_ID, LSDB)
-   #         print(f"[{ROUTER_ID}] Tabela de roteamento:")
-    #        for destino, proximo_salto in tabela.items():
-     #           print(f" - {destino} → {proximo_salto}")
 def receive_loop():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(("", PORT))
-    while True:
-        data, addr = sock.recvfrom(4096)
-        try:
-            lsa = json.loads(data.decode())
-        except json.JSONDecodeError:
-            mensagem = data.decode(errors="ignore")
-            print(f"[{ROUTER_ID}] Recebeu mensagem de host de {addr}: {mensagem}")
+    def receive_loop():
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind(("", PORT))
+        neighbors = load_neighbors()
+        hosts = load_hosts()
+        hosts_ips = set(hosts.values())  # conjunto dos IPs dos hosts
 
-            # Envia ACK de volta
+        while True:
+            data, addr = sock.recvfrom(4096)
+            ip_origem = addr[0]
+            print(f"[{ROUTER_ID}] Mensagem recebida de {ip_origem}")
+
             try:
-                ack = f"ACK: {ROUTER_ID} recebeu sua mensagem"
-                sock.sendto(ack.encode(), addr)
-                print(f"[{ROUTER_ID}] Enviou ACK para {addr}")
-            except Exception as e:
-                print(f"[{ROUTER_ID}] Falha ao enviar ACK: {e}")
-            continue
+                lsa = json.loads(data.decode())
+                # Mensagem é um LSA vindo de roteador
+                print(f"[{ROUTER_ID}] Recebeu LSA de {lsa['origin']}")
+                updated = processa_lsa(LSDB, lsa)
+                if updated:
+                    atualiza_lsdb(ROUTER_ID, LSDB)
+                    tabela = calcula_tabela_roteamento(ROUTER_ID, LSDB)
+                    print(f"[{ROUTER_ID}] Tabela de roteamento:")
+                    for destino, proximo_salto in tabela.items():
+                        print(f" - {destino} → {proximo_salto}")
 
-        print(f"[{ROUTER_ID}] Recebeu LSA de {lsa['origin']}")
-        updated = processa_lsa(LSDB, lsa)
-        if updated:
-            atualiza_lsdb(ROUTER_ID, LSDB)
+            except json.JSONDecodeError:
+                # Se não for JSON, trata como mensagem de host
+                if ip_origem in hosts_ips:
+                    mensagem = data.decode(errors="ignore")
+                    print(f"[{ROUTER_ID}] Recebeu mensagem de host {ip_origem}: {mensagem}")
 
-            tabela = calcula_tabela_roteamento(ROUTER_ID, LSDB)
-            print(f"[{ROUTER_ID}] Tabela de roteamento:")
-            for destino, proximo_salto in tabela.items():
-                print(f" - {destino} → {proximo_salto}")
-
-
+                    # Envia ACK de volta para o host
+                    try:
+                        ack = f"ACK: {ROUTER_ID} recebeu sua mensagem"
+                        sock.sendto(ack.encode(), addr)
+                        print(f"[{ROUTER_ID}] Enviou ACK para {ip_origem}")
+                    except Exception as e:
+                        print(f"[{ROUTER_ID}] Falha ao enviar ACK para host: {e}")
+                else:
+                    print(f"[{ROUTER_ID}] Mensagem recebida de IP desconhecido {ip_origem}: ignorando")
 
 def start_router():
     neighbors = load_neighbors()
@@ -88,5 +86,5 @@ def start_router():
         time.sleep(10)
 
 if __name__ == "__main__":
-    print(f"[{ROUTER_ID}] Roteador iniciado")
+    print(f"[{ROUTER_ID}] Roteador Iniciando")
     start_router()

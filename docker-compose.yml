@@ -1,101 +1,118 @@
+version: '3.8'
+
 services:
   router1:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-router
+    container_name: router1
     environment:
       - ROUTER_ID=router1
-      - PORT=10000
-    volumes:
-      - ./config/router1:/app/config/router1
+      - PORT=5000
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.11
 
   router2:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-router
+    container_name: router2
     environment:
       - ROUTER_ID=router2
-      - PORT=10000
-    volumes:
-      - ./config/router2:/app/config/router2
+      - PORT=5000
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.12
 
   router3:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-router
+    container_name: router3
     environment:
       - ROUTER_ID=router3
-      - PORT=10000
-    volumes:
-      - ./config/router3:/app/config/router3
+      - PORT=5000
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.13
 
   router4:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-router
+    container_name: router4
     environment:
       - ROUTER_ID=router4
-      - PORT=10000
-    volumes:
-      - ./config/router4:/app/config/router4
+      - PORT=5000
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.14
 
   router5:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-router
+    container_name: router5
     environment:
       - ROUTER_ID=router5
-      - PORT=10000
-    volumes:
-      - ./config/router5:/app/config/router5
+      - PORT=5000
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.15
 
   host1:
-    build: .
-    command: python hosts/hosts.py host1
-    depends_on: [router1]
+    build:
+      context: .
+      dockerfile: Dockerfile-host
+    container_name: host1
+    command: ["python", "hosts.py", "host1", "192.168.250.11"]
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.101
 
   host2:
-    build: .
-    command: python hosts/hosts.py host2
-    depends_on: [router2]
+    build:
+      context: .
+      dockerfile: Dockerfile-host
+    container_name: host2
+    command: ["python", "hosts.py", "host2", "192.168.250.12"]
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.102
 
   host3:
-    build: .
-    command: python hosts/hosts.py host3
-    depends_on: [router3]
+    build:
+      context: .
+      dockerfile: Dockerfile-host
+    container_name: host3
+    command: ["python", "hosts.py", "host3", "192.168.250.13"]
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.103
 
   host4:
-    build: .
-    command: python hosts/hosts.py host4
-    depends_on: [router4]
+    build:
+      context: .
+      dockerfile: Dockerfile-host
+    container_name: host4
+    command: ["python", "hosts.py", "host4", "192.168.250.14"]
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.104
 
   host5:
-    build: .
-    command: python hosts/hosts.py host5
-    depends_on: [router5]
+    build:
+      context: .
+      dockerfile: Dockerfile-host
+    container_name: host5
+    command: ["python", "hosts.py", "host5", "192.168.250.15"]
     networks:
-      sim_net:
+      rede:
         ipv4_address: 192.168.250.105
 
 networks:
-  sim_net:
+  rede:
     driver: bridge
     ipam:
       config:

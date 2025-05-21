@@ -1,0 +1,13 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+
+COPY routers/router.py .
+COPY utils/ ./utils
+COPY config/ ./config
+
+RUN apt-get update && apt-get install -y iputils-ping
+RUN pip install --no-cache-dir --upgrade pip
+
+CMD ["python", "router.py"]

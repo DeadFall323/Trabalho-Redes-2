@@ -12,8 +12,6 @@ def atualiza_lsdb(router_id, lsdb):
     for origin, lsa in lsdb.items():
         print(f" - {origin}: {lsa['neighbors']}")
 
-
-
 def calcula_tabela_roteamento(router_id, lsdb):
     # Construir o grafo com base na LSDB
     grafo = {}
@@ -41,8 +39,11 @@ def calcula_tabela_roteamento(router_id, lsdb):
             continue
         # Voltar até o próximo salto a partir do destino
         prox = destino
-        while anterior[prox] != router_id:
+        while anterior[prox] is not None and anterior[prox] != router_id:
             prox = anterior[prox]
+        if anterior[prox] is None:
+            # Não conseguiu encontrar caminho confiável até o router_id
+            continue
         tabela[destino] = prox
 
     return tabela

@@ -1,37 +1,59 @@
-# Instruções para rodar a simulação
-# Simulação de Rede com Roteamento por Estado de Enlace (Link State)
+# Projeto: SImulação de Rede com Roteadores e Hosts usando Docker
 
-### Passos:
+# 1 - Pré-requisitos:
+    Docker e Docker COmpose instalados na maquina
+# 2 - Como fazer os testes
+    - Clone este repositorio:
+    git clone  https://github.com/DeadFall323/Trabalho-Redes-2.git
+    
+    Suba a rede e os containers com o Docker Compose:
+    docker compose up -d
 
-# Como Executar o Projeto
-cd "nome_do_diretorio"
-# Construa os containers:
-docker-compose build
-# Inicie a simulação:
-docker-compose up
+    Verifique se os containers estão rodando:
+    docker ps
 
-### repositório:
+    Caso precise conectar manualmente hosts à rede:
+    docker network connect trabalho-redes-2_rede host1
+    docker network connect trabalho-redes-2_rede host2
+    docker network connect trabalho-redes-2_rede host3
+    docker network connect trabalho-redes-2_rede host4
+    docker network connect trabalho-redes-2_rede host5
 
-   ```bash
-   git clone https://github.com/lolanl/C-digo-fonte-_Redes_II.git
+    Acesse os containers para executar comandos ou testes:
+    docker exec -it router1 bash
+    docker exec -it host1 bash
 
-   # Os containers iniciarão e os roteadores começarão a trocar pacotes de estado de enlace. Pings entre hosts serão exibidos no terminal (com sucesso ou falha).
-   
-# Justificativa do Protocolo Escolhido:
+# 3 - Justificativa dos protocolos escolhidos:
+Neste projeto, optamos por implementar o protocolo de roteamento por estado de enlace (Link-State Routing), especificamente o algoritmo de Dijkstra, pelos seguintes motivos:
 
-#1- Utilizou-se o UDP para a comunicação entre roteadores pelos seguintes motivos:
+* Eficiência: O algoritmo de Dijkstra calcula o caminho mais curto para todos os destinos, garantindo rotas otimizadas na topologia.
+* Escalabilidade: Diferente de protocolos de vetor de distância, o protocolo de estado de enlace oferece convergência rápida e evita loops.
 
-#2- Baixa sobrecarga: UDP é mais leve, ideal para troca rápida e contínua de pacotes de estado de enlace.
+* Precisão na simulação: Permite a simulação detalhada do comportamento de roteadores que mantêm uma visão completa da topologia da rede, ideal para o entendimento acadêmico do funcionamento de redes IP.
 
-#3- Simulação de perda: É possível simular falhas ou pacotes perdidos sem complexidade adicional. Não exige conexão persistente, tornando a simulação mais flexível.
+* Controle e monitoramento: O protocolo facilita a visualização e controle da tabela de roteamento em cada roteador da rede simulada.
 
-# Como a Topologia foi Construída:
-# A rede é composta por múltiplas subredes, cada uma com:
+# 4 - Como a topologia foi construida:
+A topologia da rede foi construída usando containers Docker para simular os dispositivos de rede:
 
-#1 - Hosts (hostA e hostB)
+* Roteadores: Containers nomeados router1, router2, router3, router4, router5.
+* Hosts: Containers nomeados host1, host2, host3, host4, host5.
+* Todos os containers estão conectados a uma rede Docker bridge chamada trabalho-redes-2_rede, configurada com a subnet 192.168.250.0/24.
 
-#2 - 1 Roteador
+* A comunicação entre roteadores e hosts ocorre por essa rede comum.
+* O roteamento é feito internamente nos containers de roteador, usando scripts Python que implementam o algoritmo de Dijkstra para cálculo das rotas e atualização das tabelas de roteamento.
+* Cada roteador possui uma interface virtual dentro da rede, com IPs fixos para facilitar o roteamento e a identificação.
+* A topologia física e lógica foi modelada para representar um ambiente realista e didático, facilitando o aprendizado dos conceitos de roteamento e protocolos de rede.
 
-#Os roteadores são interconectados de forma aleatória, garantindo que a topologia seja parcialmente conectada. Cada roteador descobre seus vizinhos dinamicamente e compartilha informações via pacotes LS (Link State).
+# 5 - Diagrama de Classe
 
-#A topologia completa é usada para construir a LSDB (Link State Database) e calcular as rotas com Dijkstra.
+[]
+
+* Router: Classe que representa o roteador, com métodos para receber, enviar pacotes e atualizar a tabela de roteamento usando o protocolo.
+
+* Host: Representa um host final da rede, capaz de enviar e receber pacotes.
+
+* Network: Representa a rede Docker virtual, responsável pela conexão e comunicação entre containers.
+
+
+
